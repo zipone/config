@@ -2,7 +2,7 @@
 FROM alpine:latest
 
 # Set the maintainer label
-LABEL maintainer="your-email@example.com"
+LABEL maintainer="my-email@example.com"
 
 # Install required packages and dependencies
 RUN apk update && apk upgrade && \
