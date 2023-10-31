@@ -1,14 +1,40 @@
-FROM ubuntu:18.04
+# Use a base image, such as Debian-based image
+FROM debian:bullseye-slim
 
-RUN apt-get update && \
-    apt-get install -y wget curl bash nodejs zip docker-ce docker-ce-cli containerd.io && \
-    # Install helm
-    curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > /tmp/get_helm.sh && \
-    chmod 700 /tmp/get_helm.sh && \
-    /tmp/get_helm.sh && \
-    rm /tmp/get_helm.sh && \
-    # Install oc client
-    cd /tmp && \
-    wget https://github.com/openshift/origin/releases/download/v3.6.1/openshift-origin-client-tools-v3.6.1-008f2d5-linux-64bit.tar.gz -O oc.tgz && \
-    tar --overwrite --strip 1 -C /usr/local/bin -zxvf oc.tgz && \
-    rm -f oc.tgz
+# Set environment variables (optional)
+ENV OC_VERSION="4.8.6"
+ENV HELM_VERSION="3.7.0"
+
+# Install necessary dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    apt-transport-https \
+    ca-certificates \
+    software-properties-common
+
+# Install Docker
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
+    && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
+    && apt-get update \
+    && apt-get install -y docker-ce docker-ce-cli containerd.io
+
+# Install OpenShift 'oc' client
+RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OC_VERSION}/openshift-client-linux-${OC_VERSION}.tar.gz \
+    && tar -xvf openshift-client-linux-${OC_VERSION}.tar.gz -C /usr/local/bin/ oc \
+    && rm openshift-client-linux-${OC_VERSION}.tar.gz
+
+# Install Helm
+RUN curl -LO https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
+    && tar -xvf helm-v${HELM_VERSION}-linux-amd64.tar.gz -C /usr/local/bin/ linux-amd64/helm \
+    && rm helm-v${HELM_VERSION}-linux-amd64.tar.gz
+
+# Clean up
+RUN apt-get purge -y curl \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory (optional)
+WORKDIR /app
+
+# Default command (optional)
+CMD ["bash"]
