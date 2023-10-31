@@ -1,0 +1,28 @@
+# Use the official Ubuntu minimal image as the base
+FROM ubuntu-minimal:latest
+
+# Set the maintainer label
+LABEL maintainer="your-email@example.com"
+
+# Update the package list and install dependencies
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    curl \
+    gnupg2 \
+    lsb-release \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Docker
+RUN curl -fsSL https://get.docker.com | sh
+
+# Install Helm
+RUN curl -fsSL -o /usr/local/bin/helm https://get.helm.sh/helm-v3.7.0-linux-amd64 && \
+    chmod +x /usr/local/bin/helm
+
+# Install oc client
+RUN curl -fsSL -o /usr/local/bin/oc https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz && \
+    tar -zxvf /usr/local/bin/oc -C /usr/local/bin/ && \
+    chmod +x /usr/local/bin/oc
+
+# Set the entry point to an interactive shell
+CMD ["/bin/sh"]
