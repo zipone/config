@@ -2,7 +2,7 @@
 FROM alpine:latest
 
 # Set the maintainer label
-LABEL maintainer="my-email@example.com"
+LABEL maintainer="zipone@example.com"
 
 # Install required packages and dependencies
 RUN apk update && apk upgrade && \
@@ -19,8 +19,11 @@ RUN curl -fsSL -o /tmp/helm.tar.gz https://get.helm.sh/helm-v3.7.0-linux-amd64.t
     rm -rf /tmp/helm.tar.gz /tmp/linux-amd64
 
 # Install oc client
-RUN curl -fsSL -o /usr/local/bin/oc https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz && \
-    chmod +x /usr/local/bin/oc
+RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz && \
+    tar -zxvf openshift-client-linux.tar.gz && \
+    mv oc /usr/local/bin/oc && \
+    chmod +x /usr/local/bin/oc && \
+    rm -f openshift-client-linux.tar.gz && \
 
 # Set the entry point to an interactive shell
 CMD ["/bin/sh"]
